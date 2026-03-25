@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+font-family:Inter;
+background:#0f172a;
+color:white;
+padding:40px;
+}
+
+h1{
+margin-bottom:20px;
+}
+
+input,select,textarea{
+
+display:block;
+margin-bottom:12px;
+padding:10px;
+
+border-radius:6px;
+border:none;
+
+width:300px;
+
+background:#1e293b;
+color:white;
+
+}
+
+button{
+
+padding:10px 20px;
+border:none;
+border-radius:6px;
+
+background:#6366f1;
+color:white;
+
+cursor:pointer;
+
+}
+
+button:hover{
+background:#4f46e5;
+}
+
+.event{
+
+background:#1e293b;
+padding:20px;
+margin-bottom:15px;
+border-radius:8px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Admin Dashboard</h1>
+
+<h2>Create Event</h2>
+
+<input id="title" placeholder="Event Title">
+
+<input id="date" placeholder="Event Date">
+
+<select id="category">
+
+<option value="AI">AI</option>
+<option value="Cloud">Cloud</option>
+<option value="DevOps">DevOps</option>
+<option value="Web">Web</option>
+<option value="Hackathon">Hackathon</option>
+
+</select>
+
+<input id="capacity" placeholder="Capacity">
+
+<textarea id="description" placeholder="Description"></textarea>
+
+<button onclick="createNewEvent()">Create Event</button>
+
+<h2 style="margin-top:40px;">Existing Events</h2>
+
+<div id="events"></div>
+
+<script>
+
+const API_BASE="https://hpnic54jx1.execute-api.ap-south-1.amazonaws.com/prod";
+
+
+function loadEvents(){
+
+fetch(`${API_BASE}/events`)
+.then(res=>res.json())
+.then(events=>{
+
+const container=document.getElementById("events");
+
+container.innerHTML="";
+
+events.forEach(event=>{
+
+container.innerHTML+=`
+
+<div class="event">
+
+<h3>${event.title}</h3>
+
+<p><strong>Date:</strong> ${event.date}</p>
+
+<p><strong>Category:</strong> ${event.category}</p>
+
+<p><strong>Capacity:</strong> ${event.Capacity}</p>
+
+<button onclick="deleteEvent('${event.eventsId}')">Delete</button>
+
+</div>
+
+`;
+
+});
+
+});
+
+}
+
+loadEvents();
+
+
+
+function createNewEvent(){
+
+const title=document.getElementById("title").value;
+const date=document.getElementById("date").value;
+const description=document.getElementById("description").value;
+const capacity=document.getElementById("capacity").value;
+const category=document.getElementById("category").value;
+
+if(!title || !date || !capacity){
+
+alert("Please fill all fields");
+return;
+
+}
+
+fetch(`${API_BASE}/events`,{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+title,
+date,
+description,
+capacity,
+category
+
+})
+
+})
+
+.then(res=>res.json())
+.then(data=>{
+
+alert("Event created successfully");
+
+loadEvents();
+
+})
+.catch(err=>{
+
+console.error(err);
+alert("Failed to create event");
+
+});
+
+}
+
+
+
+function deleteEvent(id){
+
+fetch(`${API_BASE}/delete-event`,{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+eventsId:id
+
+})
+
+})
+
+.then(res=>res.json())
+.then(data=>{
+
+alert("Event deleted");
+
+loadEvents();
+
+});
+
+}
+
+</script>
+
+</body>
+
+</html>
